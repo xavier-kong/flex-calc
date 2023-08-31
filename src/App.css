@@ -99,12 +99,12 @@
 }
 
 
-.tag:first-of-type {
-      border-radius: 50px 0px 0px 50px;
-}
- .tag:last-of-type {
-       border-radius: 0px 50px 50px 0px;
-}
+/*.tag:first-of-type {*/
+      /*border-radius: 50px 0px 0px 50px;*/
+/*}*/
+ /*.tag:last-of-type {*/
+       /*border-radius: 0px 50px 50px 0px;*/
+/*}*/
 
 .tag:last-of-type>.slider-button {
 		 display:none !important;

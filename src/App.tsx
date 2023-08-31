@@ -63,7 +63,9 @@ const TagSection = ({
                 onPointerDown={onSliderSelect}
                 className="slider-button"
             >
-                <img src={"https://assets.codepen.io/576444/slider-arrows.svg"} height={"30%"} />
+                {
+                    //<img src={"https://assets.codepen.io/576444/slider-arrows.svg"} height={"30%"} />
+                }
             </div>
         </div>
     );
@@ -132,7 +134,7 @@ const TagSlider = () => {
                             );
                                 _widths[nextSectionIndex] = nextSectionWidth;
 
-                                if (tags.length > 2) {
+                                {/*if (tags.length > 2) {
                                     if (_widths[index] === 0) {
                                         _widths[nextSectionIndex] = maxPercent;
                                         _widths.splice(index, 1);
@@ -145,7 +147,7 @@ const TagSlider = () => {
                                         setTags(tags.filter((t, i) => i !== nextSectionIndex));
                                         removeEventListener();
                                     }
-                                }
+                                }*/}
 
                                 setWidths(_widths);
                             };
@@ -203,12 +205,12 @@ const styles: StylesType = {
         fontFamily: "serif"
     },
     sliderButton: {
-        width: "2em",
-        height: "2em",
+        width: "0.3em",
+        height: "4em",
         backgroundColor: "white",
         position: "absolute",
-        borderRadius: "2em",
-        right: "calc(-1.1em)",
+        //borderRadius: "2em",
+        right: "calc(-0.2em)",
         top: 0,
         display: "flex",
         justifyContent: "center",
