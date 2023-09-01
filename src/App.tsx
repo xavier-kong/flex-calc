@@ -79,28 +79,29 @@ const TagSlider = () => {
     const TagSliderRef = useRef<HTMLDivElement>(null);
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%' }}>
 
             <div
                 ref={TagSliderRef}
                 style={{
                     width: "100%",
                         display: "flex",
-                        backgroundColor:'transparent'
+                        backgroundColor:'transparent',
+                        height: '100%'
                 }}
             >
                 {tags.map((tag, index) => (
                     <TagSection
                         width={widths[index]}
                         key={index}
-                        noSliderButton={index === tags.length - 1}
+                        //noSliderButton={index === tags.length - 1}
                         name={tag.name}
                         onSliderSelect={(e) => {
                             e.preventDefault();
                             document.body.style.cursor = "ew-resize";
 
                             const startDragX = e.pageX;
-                            const sliderWidth = TagSliderRef.current.offsetWidth;
+                            const sliderWidth = TagSliderRef?.current?.offsetWidth;
 
                             const resize = (e: MouseEvent & TouchEvent) => {
                                 e.preventDefault();
@@ -226,7 +227,6 @@ const styles: StylesType = {
 function App() {
     const [direction, setDirection] = useState<boolean>(false); // left is false, right is true
     const [divCount, setDivCount] = useState<number>(2);
-    const [widths, setWidths] = useState<number[]>(new Array(_tags.length).fill(100 / _tags.length))
 
     const handleDivCount = (offset: number) => {
         const currCount = divCount;
