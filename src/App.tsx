@@ -19,7 +19,7 @@ const nearestN = (N: number, number: number) => Math.ceil(number / N) * N;
 interface TagSectionProps {
     color: string;
     width: number;
-    maxWidth: number;
+    minWidth: number;
     onSliderSelect: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
@@ -33,7 +33,7 @@ interface ColumnTagSectionProps {
 const TagSection = ({
     color,
     width,
-    maxWidth,
+    minWidth,
     onSliderSelect }: TagSectionProps) => {
         return (
             <div
@@ -44,7 +44,7 @@ const TagSection = ({
                         width: width + "%"
                 }}
             >
-                <span style={{ ...styles.tagText, fontSize: 20 }}>{Math.round(width / maxWidth)}</span>
+                <span style={{ ...styles.tagText, fontSize: 20 }}>{Math.round(width / minWidth)}</span>
 
                 <div
                     style={styles.sliderButton}
@@ -128,13 +128,13 @@ const ColumnTagSlider = ({ divCount }: { divCount: number }) => {
                             const startDragY = e.pageY;
                             const sliderHeight = TagSliderRef?.current?.offsetHeight;
 
-                            const resize = (e: MouseEvent & TouchEvent) => {
+                            const resize = (e: MouseEvent & TouchEvent & PointerEvent) => {
                                 e.preventDefault();
                                 const endDragY = e.touches ? e.touches[0].pageY : e.pageY;
                                 const distanceMoved = endDragY - startDragY;
                                 const maxPercent = heights[index] + heights[index + 1];
 
-                                const percentageMoved = nearestN(1, getPercentage(sliderHeight, distanceMoved))
+                                const percentageMoved = nearestN(1, getPercentage(sliderHeight!, distanceMoved))
                                 // const percentageMoved = getPercentage(sliderWidth, distanceMoved);
 
                                 const _heights = heights.slice();
@@ -178,11 +178,18 @@ const ColumnTagSlider = ({ divCount }: { divCount: number }) => {
                                 setHeights(_heights);
                             };
 
+                            // @ts-ignore
                             window.addEventListener("pointermove", resize);
+
+                            // @ts-ignore
                             window.addEventListener("touchmove", resize);
 
                             const removeEventListener = () => {
+
+                                // @ts-ignore
                                 window.removeEventListener("pointermove", resize);
+
+                                // @ts-ignore
                                 window.removeEventListener("touchmove", resize);
                             };
 
@@ -230,7 +237,7 @@ const RowTagSlider = ({ divCount }: { divCount: number }) => {
                 {widths.map((width, index) => (
                     <TagSection
                         width={width}
-                        maxWidth={Math.max(...widths)}
+                        minWidth={Math.min(...widths)}
                         key={index}
                         //noSliderButton={index === tags.length - 1}
                         onSliderSelect={(e) => {
@@ -246,7 +253,7 @@ const RowTagSlider = ({ divCount }: { divCount: number }) => {
                                 const distanceMoved = endDragX - startDragX;
                                 const maxPercent = widths[index] + widths[index + 1];
 
-                                const percentageMoved = nearestN(1, getPercentage(sliderWidth, distanceMoved))
+                                const percentageMoved = nearestN(1, getPercentage(sliderWidth!, distanceMoved))
                                 // const percentageMoved = getPercentage(sliderWidth, distanceMoved);
 
                                 const _widths = widths.slice();
@@ -290,11 +297,18 @@ const RowTagSlider = ({ divCount }: { divCount: number }) => {
                                 setWidths(_widths);
                             };
 
+                            // @ts-ignore
                             window.addEventListener("pointermove", resize);
+
+                            // @ts-ignore
                             window.addEventListener("touchmove", resize);
 
                             const removeEventListener = () => {
+
+                                // @ts-ignore
                                 window.removeEventListener("pointermove", resize);
+
+                                // @ts-ignore
                                 window.removeEventListener("touchmove", resize);
                             };
 
