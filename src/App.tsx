@@ -1,24 +1,7 @@
 import './App.css'
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-const _tags = [
-    {
-        name: "Action",
-        color: "red"
-    },
-    {
-        name: "Romance",
-        color: "purple"
-    },
-    {
-        name: "Comedy",
-        color: "orange"
-    },
-    {
-        name: "Horror",
-        color: "black"
-    }
-];
+const colorNames = ['black', 'blue', 'fuchsia', 'gray', 'green', 'maroon', 'navy', 'olive', 'purple', 'red', 'silver', 'teal', 'yellow']
 
 const getPercentage = (containerWidth: number, distanceMoved: number) => {
     return (distanceMoved / containerWidth) * 100;
@@ -34,48 +17,202 @@ const limitNumberWithinRange = (
 
 const nearestN = (N: number, number: number) => Math.ceil(number / N) * N;
 interface TagSectionProps {
-    name: string;
     color: string;
     width: number;
+    maxWidth: number;
+    onSliderSelect: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+}
+
+interface ColumnTagSectionProps {
+    color: string;
+    height: number;
+    minHeight: number;
     onSliderSelect: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
 const TagSection = ({
-    name,
     color,
     width,
-    onSliderSelect
-}: TagSectionProps) => {
+    maxWidth,
+    onSliderSelect }: TagSectionProps) => {
+        return (
+            <div
+                className="tag"
+                style={{
+                    ...styles.tag,
+                        background: color,
+                        width: width + "%"
+                }}
+            >
+                <span style={{ ...styles.tagText, fontSize: 20 }}>{Math.round(width / maxWidth)}</span>
+
+                <div
+                    style={styles.sliderButton}
+                    onPointerDown={onSliderSelect}
+                    className="slider-button"
+                >
+                    {
+                        //<img src={"https://assets.codepen.io/576444/slider-arrows.svg"} height={"30%"} />
+                    }
+                </div>
+            </div>
+        );
+    };
+
+const ColumnTagSection = ({
+    color,
+    height,
+    minHeight,
+    onSliderSelect }: ColumnTagSectionProps) => {
+
+        return (
+            <div
+                className="tag"
+                style={{
+                    ...styles.columnTag,
+                        background: color,
+                        height: height + "%",
+                        display: 'flex',
+                        flexDirection: 'column'
+                }}
+            >
+                <span style={{ ...styles.tagText, fontSize: 20 }}>{Math.round(height / minHeight)}</span>
+
+                <div
+                    style={styles.columnSliderButton}
+                    onPointerDown={onSliderSelect}
+                    className="slider-button"
+                >
+                    {
+                        //<img src={"https://assets.codepen.io/576444/slider-arrows.svg"} height={"30%"} />
+                    }
+                </div>
+            </div>
+        );
+    };
+
+const ColumnTagSlider = ({ divCount }: { divCount: number }) => {
+    const [heights, setHeights] = useState<number[]>(
+        new Array(divCount).fill(100 / divCount)
+    );
+
+    useEffect(() => {
+        const newHeights = new Array(divCount).fill(100 / divCount);
+        setHeights(newHeights);
+    }, [divCount])
+    const TagSliderRef = useRef<HTMLDivElement>(null);
+
     return (
-        <div
-            className="tag"
-            style={{
-                ...styles.tag,
-                    background: color,
-                    width: width + "%"
-            }}
-        >
-            <span style={styles.tagText}>{name}</span>
-            <span style={{ ...styles.tagText, fontSize: 12 }}>{width + "%"}</span>
+        <div style={{ width: '100%', height: '100%' }}>
 
             <div
-                style={styles.sliderButton}
-                onPointerDown={onSliderSelect}
-                className="slider-button"
+                ref={TagSliderRef}
+                style={{
+                    width: "100%",
+                        display: "flex",
+                        backgroundColor:'transparent',
+                        height: '100%',
+                        flexDirection: 'column'
+                }}
             >
-                {
-                    //<img src={"https://assets.codepen.io/576444/slider-arrows.svg"} height={"30%"} />
-                }
+                {heights.map((height, index) => (
+                    <ColumnTagSection
+                        height={height}
+                        minHeight={Math.min(...heights)}
+                        key={index}
+                        //noSliderButton={index === tags.length - 1}
+                        onSliderSelect={(e) => {
+                            e.preventDefault();
+                            document.body.style.cursor = "ew-resize";
+
+                            const startDragY = e.pageY;
+                            const sliderHeight = TagSliderRef?.current?.offsetHeight;
+
+                            const resize = (e: MouseEvent & TouchEvent) => {
+                                e.preventDefault();
+                                const endDragY = e.touches ? e.touches[0].pageY : e.pageY;
+                                const distanceMoved = endDragY - startDragY;
+                                const maxPercent = heights[index] + heights[index + 1];
+
+                                const percentageMoved = nearestN(1, getPercentage(sliderHeight, distanceMoved))
+                                // const percentageMoved = getPercentage(sliderWidth, distanceMoved);
+
+                                const _heights = heights.slice();
+
+                                const prevPercentage = _heights[index];
+
+                                const newPercentage = prevPercentage + percentageMoved;
+                                const currentSectionHeight = limitNumberWithinRange(
+                                newPercentage,
+                                    0,
+                                    maxPercent
+                            );
+                                _heights[index] = currentSectionHeight;
+
+                                const nextSectionIndex = index + 1;
+
+                                const nextSectionNewPercentage =
+                                    _heights[nextSectionIndex] - percentageMoved;
+                                const nextSectionHeight = limitNumberWithinRange(
+                                nextSectionNewPercentage,
+                                    0,
+                                    maxPercent
+                            );
+                                _heights[nextSectionIndex] = nextSectionHeight;
+
+                                {/*if (tags.length > 2) {
+                                    if (_widths[index] === 0) {
+                                        _widths[nextSectionIndex] = maxPercent;
+                                        _widths.splice(index, 1);
+                                        setTags(tags.filter((t, i) => i !== index));
+                                        removeEventListener();
+                                    }
+                                    if (_widths[nextSectionIndex] === 0) {
+                                        _widths[index] = maxPercent;
+                                        _widths.splice(nextSectionIndex, 1);
+                                        setTags(tags.filter((t, i) => i !== nextSectionIndex));
+                                        removeEventListener();
+                                    }
+                                }*/}
+
+                                setHeights(_heights);
+                            };
+
+                            window.addEventListener("pointermove", resize);
+                            window.addEventListener("touchmove", resize);
+
+                            const removeEventListener = () => {
+                                window.removeEventListener("pointermove", resize);
+                                window.removeEventListener("touchmove", resize);
+                            };
+
+                            const handleEventUp = (e: Event) => {
+                                e.preventDefault();
+                                document.body.style.cursor = "initial";
+                                removeEventListener();
+                            };
+
+                            window.addEventListener("touchend", handleEventUp);
+                            window.addEventListener("pointerup", handleEventUp);
+                        }}
+                        color={colorNames[index]}
+                    />
+                ))}
             </div>
         </div>
     );
 };
 
-const TagSlider = () => {
+
+const RowTagSlider = ({ divCount }: { divCount: number }) => {
     const [widths, setWidths] = useState<number[]>(
-        new Array(_tags.length).fill(100 / _tags.length)
+        new Array(divCount).fill(100 / divCount)
     );
-    const [tags, setTags] = useState(_tags);
+
+    useEffect(() => {
+        const newWidths = new Array(divCount).fill(100 / divCount);
+        setWidths(newWidths);
+    }, [divCount])
     const TagSliderRef = useRef<HTMLDivElement>(null);
 
     return (
@@ -90,12 +227,12 @@ const TagSlider = () => {
                         height: '100%'
                 }}
             >
-                {tags.map((tag, index) => (
+                {widths.map((width, index) => (
                     <TagSection
-                        width={widths[index]}
+                        width={width}
+                        maxWidth={Math.max(...widths)}
                         key={index}
                         //noSliderButton={index === tags.length - 1}
-                        name={tag.name}
                         onSliderSelect={(e) => {
                             e.preventDefault();
                             document.body.style.cursor = "ew-resize";
@@ -170,14 +307,10 @@ const TagSlider = () => {
                             window.addEventListener("touchend", handleEventUp);
                             window.addEventListener("pointerup", handleEventUp);
                         }}
-                        color={tag.color}
+                        color={colorNames[index]}
                     />
                 ))}
             </div>
-            <button onClick={()=>{
-                setTags(_tags)
-                setWidths(new Array(_tags.length).fill(100 / _tags.length))
-            }} style={{marginTop:10}}>Refresh</button>
         </div>
     );
 };
@@ -196,6 +329,18 @@ const styles: StylesType = {
         borderLeftWidth: ".1em",
         borderLeftStyle: "solid",
         borderLeftColor: "white"
+    },
+    columnTag: {
+        padding: 20,
+        textAlign: "center",
+        position: "relative",
+        borderBottomWidth: ".1em",
+        borderBottomStyle: "solid",
+        borderBottomColor: "white",
+        boxSizing: "border-box",
+        borderTopWidth: ".1em",
+        borderTopStyle: "solid",
+        borderTopColor: "white"
     },
     tagText: {
         color: "white",
@@ -217,6 +362,23 @@ const styles: StylesType = {
         justifyContent: "center",
         alignItems: "center",
         bottom: 0,
+        margin: "auto",
+        zIndex: 10,
+        cursor: "ew-resize",
+        userSelect: "none"
+    },
+    columnSliderButton: {
+        width: "4em",
+        height: "0.3em",
+        backgroundColor: "white",
+        position: "absolute",
+        //borderRadius: "2em",
+        bottom: "calc(-0.2em)",
+        left: 0,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        right: 0,
         margin: "auto",
         zIndex: 10,
         cursor: "ew-resize",
@@ -281,7 +443,11 @@ function App() {
                     </div>
                     <div className="box-container flex-1">
                         <div className={!direction ? 'row-div' : 'col-div'}>
-                            <TagSlider />
+                            { !direction 
+                                ? 
+                                    <RowTagSlider divCount={divCount} /> 
+                                    : <ColumnTagSlider divCount={divCount} />
+                            }
                         </div>
                     </div>
                 </div>
